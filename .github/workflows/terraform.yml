@@ -1,44 +1,28 @@
-name: Terraform Deploy
-
-on:
-  push:
-    branches:
-      - terraform-ec2
-  pull_request:
-    branches:
-      - terraform-ec2
-
 jobs:
   terraform:
-    name: Terraform Workflow
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout code
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Set up Terraform
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: 1.5.7  # Adjust based on your project
+          terraform_version: 1.5.7
 
-      # Step 3: Initialize Terraform
+      - name: Verify AWS Credentials
+        run: aws sts get-caller-identity
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-east-1
+
       - name: Terraform Init
         run: terraform init
 
-      # Step 4: Validate Terraform files
-      - name: Terraform Validate
-        run: terraform validate
-
-      # Step 5: Plan Terraform changes
       - name: Terraform Plan
         run: terraform plan -var-file=environments/dev.tfvars
-
-      # Step 6: Apply Terraform changes
-      - name: Terraform Apply
-        run: terraform apply -auto-approve -var-file=environments/dev.tfvars
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
