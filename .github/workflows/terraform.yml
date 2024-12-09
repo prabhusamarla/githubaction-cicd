@@ -50,7 +50,7 @@ jobs:
           AWS_DEFAULT_REGION: us-east-1
 
       # Optional: Add Terraform Apply Step
-      - name: Terraform Apply
+#      - name: Terraform Apply
         if: github.ref_name == 'main'
         run: terraform apply -auto-approve -var-file=environments/${{ env.tfvars_file }}
         env:
