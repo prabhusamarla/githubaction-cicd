@@ -3,9 +3,8 @@ name: Terraform Deploy
 on:
   push:
     branches:
-      - terraform-ec2
-  pull_request:
-    branches:
+      - main
+      - develop
       - terraform-ec2
 
 jobs:
@@ -13,40 +12,48 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the repository code
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Setup Terraform environment
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: 1.5.7
 
-      # Step 3: Verify AWS Credentials
-      - name: Verify AWS Credentials
-        run: aws sts get-caller-identity
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: us-east-1
+    #  - name: Verify AWS Credentials
+    #    run: aws sts get-caller-identity
+    #    env:
+    #      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+    #      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    #      AWS_DEFAULT_REGION: us-east-1
 
-      # Step 4: Initialize Terraform
       - name: Terraform Init
         run: terraform init
 
-      # Step 5: Terraform Plan
+      - name: Determine Environment Variables File
+        id: env-vars
+        run: |
+          if [[ "${{ github.ref_name }}" == "main" ]]; then
+            echo "tfvars_file=prod.tfvars" >> $GITHUB_ENV
+          elif [[ "${{ github.ref_name }}" == "terraform-ec2" ]]; then
+            echo "tfvars_file=dev.tfvars" >> $GITHUB_ENV
+          else
+            echo "Branch not supported"
+            exit 1
+          fi
+
       - name: Terraform Plan
-        run: terraform plan -var-file=environments/dev.tfvars
+        run: terraform plan -var-file=environments/${{ env.tfvars_file }}
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: us-east-1
 
-      # Step 6: Terraform Apply (optional step; uncomment if auto-deploying)
-      # - name: Terraform Apply
-      #   run: terraform apply -auto-approve -var-file=environments/dev.tfvars
-      #   env:
-      #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      #     AWS_DEFAULT_REGION: us-east-1
+      # Optional: Add Terraform Apply Step
+      - name: Terraform Apply
+        if: github.ref_name == 'main'
+        run: terraform apply -auto-approve -var-file=environments/${{ env.tfvars_file }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-east-1
