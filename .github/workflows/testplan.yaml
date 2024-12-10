@@ -47,7 +47,7 @@ jobs:
   terraform-apply:
     needs: terraform
     runs-on: ubuntu-latest
-    if: github.ref_name == 'main' # Ensure this only runs for the main branch
+    if: github.ref_name == 'terraform-ec2' # Ensure this only runs for the main branch
 
     steps:
       - name: Download Terraform Plan
