@@ -70,8 +70,17 @@ jobs:
         with:
           terraform_version: 1.5.7
 
+#      - name: Terraform Apply
+#        run: terraform apply -auto-approve tfplan
+#        env:
+#          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#          AWS_DEFAULT_REGION: us-east-1
+
+
+      # Optional: Add Terraform Apply Step
       - name: Terraform Apply
-        run: terraform apply -auto-approve tfplan
+        run: terraform apply -auto-approve -var-file=environments/${{ env.tfvars_file }}
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
