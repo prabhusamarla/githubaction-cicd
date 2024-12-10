@@ -23,6 +23,9 @@ jobs:
       - name: Terraform Init
         run: terraform init
 
+      - name: Make Script Executable
+        run: chmod +x ./determine_env.sh
+    
       - name: Determine Environment Variables File
         id: env-vars
         run: ./determine_env.sh
