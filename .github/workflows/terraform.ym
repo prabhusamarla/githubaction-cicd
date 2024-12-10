@@ -32,15 +32,7 @@ jobs:
 
       - name: Determine Environment Variables File
         id: env-vars
-        run: |
-          if [[ "${{ github.ref_name }}" == "main" ]]; then
-            echo "tfvars_file=prod.tfvars" >> $GITHUB_ENV
-          elif [[ "${{ github.ref_name }}" == "terraform-ec2" ]]; then
-            echo "tfvars_file=dev.tfvars" >> $GITHUB_ENV
-          else
-            echo "Branch not supported"
-            exit 1
-          fi
+        run: ./determine_env.sh
 
       - name: Terraform Plan
         run: terraform plan -var-file=environments/${{ env.tfvars_file }}
