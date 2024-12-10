@@ -4,6 +4,6 @@ terraform {
     key            = "state-file/terraform.tfstate" # Path within the bucket
     region         = "us-east-1"                # S3 bucket region
     encrypt        = false                       # Encrypt the state file
-#    dynamodb_table = "terraform-state-lock"     # DynamoDB table for state locking (optional)
+#    dynamodb_table = "terraform-state-lock"     # DynamoDB table for state locking
   }
 }
